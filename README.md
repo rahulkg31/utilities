@@ -1,2 +1,2 @@
-# java-utility
-Useful Java code compilation.
+# utilities
+Sample applications
