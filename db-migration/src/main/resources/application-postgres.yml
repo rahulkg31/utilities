@@ -1,0 +1,26 @@
+spring:
+  liquibase:
+    change-log: classpath:db/changelog/jdbc/db.changelog-master.yaml
+
+db:
+  type: ${DB_TYPE:jdbc}
+  jdbc:
+    type: postgres                  # postgres | h2
+    host: localhost
+    port: 5432
+    database: demo
+    username: demo
+    password: demo
+    ssl-enabled: false
+    mtls-enabled: false
+    ssl-mode: verify-full           # used only when ssl-enabled=true
+    root-cert: /certs/root.crt      # used only when mtls-enabled=true
+    client-cert: /certs/client.crt
+    client-key: /certs/client.pk8   # Postgres JDBC needs the key in PKCS8 DER format
+    extra-params: ApplicationName=demo-migration
+    pool:
+      pool-name: migration-pool
+      maximum-pool-size: 2          # a migration needs very few connections
+      minimum-idle: 1
+      connection-timeout-ms: 30000
+      

@@ -1,0 +1,6 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/jdbc/changes/001-create-port-registry-table.sql
+  - include:
+      file: db/changelog/jdbc/changes/002-create-port-registry-index.sql
+      

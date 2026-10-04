@@ -1,0 +1,19 @@
+spring:
+  liquibase:
+    change-log: classpath:db/changelog/jdbc/db.changelog-master.yaml
+
+db:
+  type: ${DB_TYPE:jdbc}
+  jdbc:
+    # For H2, `database` holds the full spec
+    # (mem:mydb, file:./data/mydb, tcp://localhost:9092/mydb).
+    type: h2
+    database: file:./data/mydb
+    username: sa
+    password:
+    extra-params: DB_CLOSE_DELAY=-1
+    pool:
+      pool-name: migration-pool
+      maximum-pool-size: 2
+      minimum-idle: 1    
+      

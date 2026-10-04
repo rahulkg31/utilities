@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-create-port-registry-index
+      author: demo
+      changes:
+        - createIndex:
+            collectionName: port_registry
+            keys: '{ network_scope: 1, private_ip: 1, port: 1 }'
+            options: '{ name: "idx_registry_scope_ip_port" }'
+            

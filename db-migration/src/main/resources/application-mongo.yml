@@ -1,0 +1,33 @@
+spring:
+  liquibase:
+    change-log: classpath:db/changelog/mongo/db.changelog-master.yaml
+
+db:
+  type: ${DB_TYPE:mongo}
+  mongodb:
+    # ---- Option 1 (active): plain connection, URI built from the fields below ----
+    host: localhost
+    port: 27017
+    database: demo                  # required: Liquibase reads the DB name from the URI path
+    username: 
+    password: 
+    ssl-enabled: false
+    extra-params:
+
+    # ---- Option 2: TLS / mTLS ----
+    # host: mongo.example.com
+    # port: 27017
+    # database: demo
+    # username: ${MONGO_USERNAME}
+    # password: ${MONGO_PASSWORD}
+    # ssl-enabled: true             # adds tls=true
+    # extra-params: authSource=admin&tlsCAFile=/certs/ca.pem&tlsCertificateKeyFile=/certs/client.pem
+  
+
+    # ---- Option 3: full URL, used verbatim (mongodb:// or mongodb+srv://) ----
+    # When set, host/port/username/password/extra-params are ignored.
+    #
+    # url: mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@cluster0.example.mongodb.net/demo?retryWrites=true
+
+
+

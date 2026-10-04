@@ -1,0 +1,26 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-port-registry-collection
+      author: demo
+      changes:
+        - createCollection:
+            collectionName: port_registry
+            options: |
+              {
+                validator: {
+                  $jsonSchema: {
+                    bsonType: "object",
+                    required: ["name", "port", "network_scope", "created_at", "updated_at"],
+                    properties: {
+                      name:          { bsonType: "string", maxLength: 255 },
+                      category:      { bsonType: ["string", "null"], maxLength: 100 },
+                      private_ip:    { bsonType: ["string", "null"], maxLength: 45 },
+                      port:          { bsonType: "int" },
+                      description:   { bsonType: ["string", "null"], maxLength: 1000 },
+                      network_scope: { bsonType: "string", maxLength: 150 },
+                      created_at:    { bsonType: "date" },
+                      updated_at:    { bsonType: "date" }
+                    }
+                  }
+                }
+              }
