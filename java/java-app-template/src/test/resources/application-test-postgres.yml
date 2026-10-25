@@ -1,0 +1,17 @@
+# Loaded when a test uses @ActiveProfiles("test-postgres").
+server:
+  port: 0   # random port, avoids clashing with a running local instance
+  
+# Consumed by JdbcProperties / JdbcConfig
+db:
+  type: jdbc
+  jdbc:
+    type: postgres
+    pool:
+      pool-name: pg-test-pool
+      maximum-pool-size: 10  
+      minimum-idle: 1
+      connection-timeout-ms: 10000
+      idle-timeout-ms: 600000
+      max-lifetime-ms: 1800000
+      leak-detection-threshold-ms: 0

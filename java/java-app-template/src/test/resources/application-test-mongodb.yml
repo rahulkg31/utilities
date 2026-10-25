@@ -1,0 +1,25 @@
+# Loaded when a test uses @ActiveProfiles("test-mongo").
+# Runs against a throwaway MongoDB started by Testcontainers (see MongoRegistryRepositoryIT).
+# db.mongodb.url is NOT set here: the test injects the container's URL via @DynamicPropertySource.
+
+server:
+  port: 0   # random port, avoids clashing with a running local instance
+
+spring:
+  autoconfigure:
+    # No relational DB in this profile, so keep JDBC/JPA/Liquibase from trying to start
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration
+      - org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration
+
+# Consumed by MongoProperties / MongoConfig
+db:
+  type: mongodb
+  mongodb:
+    database: registry_test
+    ssl-enabled: false
+    mtls-enabled: false
+    # url: mongodb://localhost:27017/registry_test   # only for running against a local mongod without Testcontainers

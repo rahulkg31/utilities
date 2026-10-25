@@ -1,25 +1,63 @@
 # Maven
 target/
+dependency-reduced-pom.xml
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+release.properties
+
+# Local Maven repository, if it exists inside the project
+.m2-repo/
 
 # IDE - Eclipse
 .settings/
 .project
 .classpath
+.factorypath
 
 # IDE - IntelliJ IDEA
 .idea/
 *.iml
+*.ipr
+*.iws
 
-# Application runtime data
+# IDE - VS Code
+.vscode/
+
+# Application runtime data (default H2 database lives in data/)
 data/
-logs/
+*.mv.db
+*.trace.db
+*.lock.db
 
-# Local Maven repository, if it exists inside the project
-.m2-repo/
+# Logs
+logs/
+*.log
+*.logs
+hs_err_pid*
+
+# Secrets and local overrides (never commit)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.jks
+*.keystore
+*.truststore
+application-local.yml
+application-local.properties
+
+# Docker local overrides
+docker-compose.override.yml
+docker/docker-compose.override.yml
+
+# Editor swap/backup files
+*.swp
+*.swo
+*~
 
 # OS files
 .DS_Store
 Thumbs.db
-
-# Logs
-*.log

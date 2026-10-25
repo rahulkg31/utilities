@@ -1,0 +1,57 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+db:
+  # jdbc | mongodb
+  type: ${DB_TYPE:jdbc}
+
+  jdbc:
+    # h2 | postgres (only needed when url + driver + dialect aren't all set explicitly)
+    type: ${JDBC_TYPE:h2}
+    # H2: full spec (file:./data/testdb, mem:testdb). Postgres: database name only.
+    database: ${JDBC_DATABASE:file:./data/testdb;DB_CLOSE_ON_EXIT=FALSE}
+    username: ${JDBC_USERNAME:sa}
+    password: ${JDBC_PASSWORD:}
+
+    # Postgres only (ignored for h2):
+    host: ${JDBC_HOST:localhost}
+    port: ${JDBC_PORT:5432}
+    ssl-enabled: ${JDBC_SSL_ENABLED:false}
+    ssl-mode: ${JDBC_SSL_MODE:verify-full}
+    mtls-enabled: ${JDBC_MTLS_ENABLED:false}
+    root-cert: ${JDBC_ROOT_CERT:}
+    client-cert: ${JDBC_CLIENT_CERT:}
+    client-key: ${JDBC_CLIENT_KEY:}
+
+    # Escape hatches, leave empty normally:
+    url: ${JDBC_URL:}                         # used verbatim if set (any JDBC database)
+    driver: ${JDBC_DRIVER:}                   # needed only with a custom url
+    hibernate-dialect: ${JDBC_HIBERNATE_DIALECT:}
+    extra-params: ${JDBC_EXTRA_PARAMS:}       # H2: appended after ';'  Postgres: after '?' or '&'
+
+    pool:
+      pool-name: ${JDBC_POOL_NAME:h2-dev-pool}
+      maximum-pool-size: ${JDBC_POOL_MAXIMUM_SIZE:10}
+      minimum-idle: ${JDBC_POOL_MINIMUM_IDLE:2}
+      connection-timeout-ms: ${JDBC_POOL_CONNECTION_TIMEOUT_MS:30000}
+      idle-timeout-ms: ${JDBC_POOL_IDLE_TIMEOUT_MS:600000}
+      max-lifetime-ms: ${JDBC_POOL_MAX_LIFETIME_MS:1800000}
+      leak-detection-threshold-ms: ${JDBC_POOL_LEAK_DETECTION_THRESHOLD_MS:0}
+
+  mongodb:
+    # Only used when db.type=mongodb.
+    # url is used verbatim if set; database is always required.
+    url: ${MONGODB_URL:}
+    host: ${MONGODB_HOST:localhost}
+    port: ${MONGODB_PORT:27017}
+    database: ${MONGODB_DATABASE:demo}
+    username: ${MONGODB_USERNAME:}
+    password: ${MONGODB_PASSWORD:}
+    ssl-enabled: ${MONGODB_SSL_ENABLED:false}
+    mtls-enabled: ${MONGODB_MTLS_ENABLED:false}
+    keystore: ${MONGODB_KEYSTORE:}
+    keystore-password: ${MONGODB_KEYSTORE_PASSWORD:}
+    truststore: ${MONGODB_TRUSTSTORE:}
+    truststore-password: ${MONGODB_TRUSTSTORE_PASSWORD:}
+    extra-params: ${MONGODB_EXTRA_PARAMS:}
+    

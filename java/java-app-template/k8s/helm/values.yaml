@@ -1,0 +1,69 @@
+replicaCount: 1
+
+image:
+  repository: demo
+  tag: "1.0.0"          # falls back to Chart.appVersion if empty
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080            # Service port
+  targetPort: http      # container port name
+
+containerPort: 8080
+
+# ---- ConfigMap data (rendered into <release>-config) ----
+config:
+  SPRING_PROFILES_ACTIVE: "default"
+  SERVER_PORT: "8080"
+  DB_TYPE: "jdbc"
+
+  # Default: embedded H2 so the app runs with zero external dependencies.
+  JDBC_TYPE: "h2"
+  JDBC_DATABASE: "file:./data/testdb;DB_CLOSE_ON_EXIT=FALSE"
+  JDBC_SSL_ENABLED: "false"
+
+  JDBC_POOL_NAME: "app-pool"
+  JDBC_POOL_MAXIMUM_SIZE: "10"
+  JDBC_POOL_MINIMUM_IDLE: "2"
+  JDBC_POOL_CONNECTION_TIMEOUT_MS: "30000"
+  JDBC_POOL_IDLE_TIMEOUT_MS: "600000"
+  JDBC_POOL_MAX_LIFETIME_MS: "1800000"
+  JDBC_POOL_LEAK_DETECTION_THRESHOLD_MS: "0"
+
+# ---- Secret data (rendered into <release>-secret) ----
+# Override at install time (e.g. --set secret.JDBC_PASSWORD=...) or use existingSecret.
+secret:
+  JDBC_USERNAME: "sa"
+  JDBC_PASSWORD: ""
+
+# If set, the chart will NOT create a Secret and will use this one instead.
+existingSecret: ""
+
+# ---- H2 data volume ----
+persistence:
+  mountPath: /app/data
+  # false = emptyDir (data lost on pod restart, same as original manifest)
+  # true  = PVC (use this for real persistence)
+  enabled: false
+  size: 1Gi
+  storageClassName: ""
+  accessMode: ReadWriteOnce
+
+probes:
+  readiness:
+    path: /actuator/health
+    initialDelaySeconds: 20
+    periodSeconds: 10
+  liveness:
+    path: /actuator/health
+    initialDelaySeconds: 40
+    periodSeconds: 20
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi

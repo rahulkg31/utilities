@@ -1,0 +1,15 @@
+# Usage:
+#   docker compose -f docker/docker-compose-build.yml run --rm build    # builds the jar via Maven
+
+services:
+  build:
+    image: maven:3.9.9-eclipse-temurin-17
+    working_dir: /build
+    user: "${APP_UID:-1000}:${APP_GID:-1000}"
+    environment:
+      HOME: /tmp
+      MAVEN_CONFIG: /tmp/.m2
+    volumes:
+      - ..:/build
+    command: mvn -B -e -Dmaven.repo.local=/build/.m2-repo clean package
+    

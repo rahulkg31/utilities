@@ -1,0 +1,25 @@
+[Unit]
+Description=Demo (Spring Boot service)
+After=network.target
+
+[Service]
+Type=simple
+User=appuser
+Group=appuser
+
+# Keep these in sync with start.sh / stop.sh
+Environment=APP_NAME=demo
+Environment=APP_VERSION=1.0.0
+Environment=APP_HOME=/opt/demo
+
+WorkingDirectory=${APP_HOME}
+ExecStart=/usr/bin/java -Dspring.config.location=${APP_HOME}/conf/ -jar ${APP_HOME}/lib/${APP_NAME}-${APP_VERSION}.jar
+
+SuccessExitCodes=143
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target
+

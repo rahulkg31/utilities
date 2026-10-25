@@ -1,0 +1,408 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>4.2.0-M1</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>com.example</groupId>
+    <artifactId>demo</artifactId>
+    <version>1.0.0</version>
+
+    <properties>
+        <java.version>17</java.version>
+        <springdoc.version>3.0.0</springdoc.version>
+        <skip.dist>false</skip.dist>
+        <dist.staging>${project.build.directory}/${project.build.finalName}</dist.staging>
+
+        <!-- Image coordinates for `mvn spring-boot:build-image` -->
+        <docker.registry>docker.io/example</docker.registry>
+        <docker.image.name>${docker.registry}/${project.artifactId}:${project.version}</docker.image.name>
+    </properties>
+
+    <dependencies>
+
+        <!--
+            Logging: exclude Logback from the whole tree. Keep this first so it
+            wins Maven's nearest-definition mediation over the other starters.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-log4j2</artifactId>
+        </dependency>
+
+        <!-- Web, validation, actuator -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- Persistence -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- OpenAPI / Swagger UI -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>${springdoc.version}</version>
+        </dependency>
+
+        <!-- Test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-mongodb</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <finalName>demo-${project.version}</finalName>
+
+        <plugins>
+
+            <!-- Fail the build if Logback sneaks back in -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>ban-logback</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <bannedDependencies>
+                                    <excludes>
+                                        <exclude>ch.qos.logback:*</exclude>
+                                        <exclude>org.springframework.boot:spring-boot-starter-logging</exclude>
+                                        <exclude>org.apache.logging.log4j:log4j-to-slf4j</exclude>
+                                    </excludes>
+                                    <message>Logback is banned: this project uses Log4j2 only.</message>
+                                </bannedDependencies>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Main class in the plain jar's manifest (used by the distribution) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.example.demo.Application</mainClass>
+                            <addClasspath>true</addClasspath>
+                            <classpathLayoutType>simple</classpathLayoutType>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <!-- Runtime dependency jars, bundled into lib/ by the distribution step -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-runtime-dependencies</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/dependency-jars</outputDirectory>
+                            <includeScope>runtime</includeScope>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--
+                Executable fat jar (classifier "executable").
+                Image build is explicit, not part of `package`:
+                    mvn spring-boot:build-image
+                    mvn spring-boot:build-image -Dspring-boot.build-image.publish=true
+            -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>repackage</id>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <mainClass>com.example.demo.Application</mainClass>
+                    <classifier>executable</classifier>
+                    <image>
+                        <name>${docker.image.name}</name>
+                        <env>
+                            <BP_JVM_VERSION>${java.version}</BP_JVM_VERSION>
+                        </env>
+                    </image>
+                </configuration>
+            </plugin>
+
+            <!--
+                Builds the distribution (bin/, conf/, db/, docker/, k8s/, docs/,
+                scripts/, lib/, README.md, VERSION) as .tar.gz and .zip with
+                SHA-256 checksums. Every source directory must exist (add
+                .gitkeep to empty ones) or `package` fails.
+                Skip with -Dskip.dist=true.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>build-distribution</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${skip.dist}</skip>
+                            <target>
+
+                                <delete dir="${dist.staging}"/>
+                                <mkdir dir="${dist.staging}"/>
+
+                                <mkdir dir="${dist.staging}/bin"/>
+                                <copy todir="${dist.staging}/bin">
+                                    <fileset dir="${project.basedir}/bin">
+                                        <include name="*.sh"/>
+                                        <include name="*.bat"/>
+                                        <include name="*.service"/>
+                                    </fileset>
+                                </copy>
+                                <chmod perm="0755">
+                                    <fileset dir="${dist.staging}/bin">
+                                        <include name="*.sh"/>
+                                        <include name="*.bat"/>
+                                    </fileset>
+                                </chmod>
+
+                                <mkdir dir="${dist.staging}/conf"/>
+                                <copy todir="${dist.staging}/conf">
+                                    <fileset dir="${project.basedir}/src/main/resources">
+                                        <include name="application.yml"/>
+                                        <include name="application-default.yml"/>
+                                        <include name="log4j2.xml"/>
+                                    </fileset>
+                                </copy>
+
+                                <mkdir dir="${dist.staging}/db"/>
+                                <copy todir="${dist.staging}/db">
+                                    <fileset dir="${project.basedir}/src/main/resources/db"/>
+                                </copy>
+
+                                <mkdir dir="${dist.staging}/docker"/>
+                                <copy todir="${dist.staging}/docker">
+                                    <fileset dir="${project.basedir}/docker">
+                                        <include name="*.sh"/>
+                                    </fileset>
+                                </copy>
+                                <chmod perm="0755">
+                                    <fileset dir="${dist.staging}/docker">
+                                        <include name="*.sh"/>
+                                    </fileset>
+                                </chmod>
+                                <copy todir="${dist.staging}/docker">
+                                    <fileset dir="${project.basedir}/docker">
+                                        <exclude name="*.sh"/>
+                                        <exclude name="**/*-build.*"/>
+                                        <exclude name="**/*-dev.*"/>
+                                        <exclude name="**/*.dev"/>
+                                    </fileset>
+                                </copy>
+
+                                <mkdir dir="${dist.staging}/k8s"/>
+                                <copy todir="${dist.staging}/k8s">
+                                    <fileset dir="${project.basedir}/k8s">
+                                        <exclude name="**/*-dev.*"/>
+                                        <exclude name="**/*.dev"/>
+                                    </fileset>
+                                </copy>
+
+                                <mkdir dir="${dist.staging}/docs"/>
+                                <copy todir="${dist.staging}/docs">
+                                    <fileset dir="${project.basedir}/docs"/>
+                                </copy>
+
+                                <mkdir dir="${dist.staging}/scripts"/>
+                                <copy todir="${dist.staging}/scripts">
+                                    <fileset dir="${project.basedir}/scripts">
+                                        <include name="*.sh"/>
+                                    </fileset>
+                                </copy>
+                                <chmod perm="0755">
+                                    <fileset dir="${dist.staging}/scripts">
+                                        <include name="*.sh"/>
+                                    </fileset>
+                                </chmod>
+
+                                <copy file="${project.basedir}/README.md" todir="${dist.staging}"/>
+                                <echo file="${dist.staging}/VERSION" message="${project.version}${line.separator}"/>
+
+                                <mkdir dir="${dist.staging}/lib"/>
+                                <copy file="${project.build.directory}/${project.build.finalName}.jar"
+                                      tofile="${dist.staging}/lib/${project.build.finalName}.jar"/>
+                                <copy todir="${dist.staging}/lib">
+                                    <fileset dir="${project.build.directory}/dependency-jars"/>
+                                </copy>
+
+                                <tar destfile="${project.build.directory}/${project.build.finalName}.tar.gz"
+                                     compression="gzip" longfile="gnu">
+                                    <tarfileset dir="${project.build.directory}" filemode="755">
+                                        <include name="${project.build.finalName}/bin/*.sh"/>
+                                        <include name="${project.build.finalName}/bin/*.bat"/>
+                                        <include name="${project.build.finalName}/docker/*.sh"/>
+                                        <include name="${project.build.finalName}/scripts/*.sh"/>
+                                    </tarfileset>
+                                    <tarfileset dir="${project.build.directory}">
+                                        <include name="${project.build.finalName}/**"/>
+                                        <exclude name="${project.build.finalName}/bin/*.sh"/>
+                                        <exclude name="${project.build.finalName}/bin/*.bat"/>
+                                        <exclude name="${project.build.finalName}/docker/*.sh"/>
+                                        <exclude name="${project.build.finalName}/scripts/*.sh"/>
+                                    </tarfileset>
+                                </tar>
+
+                                <zip destfile="${project.build.directory}/${project.build.finalName}.zip">
+                                    <zipfileset dir="${project.build.directory}" filemode="755">
+                                        <include name="${project.build.finalName}/bin/*.sh"/>
+                                        <include name="${project.build.finalName}/bin/*.bat"/>
+                                        <include name="${project.build.finalName}/docker/*.sh"/>
+                                        <include name="${project.build.finalName}/scripts/*.sh"/>
+                                    </zipfileset>
+                                    <zipfileset dir="${project.build.directory}">
+                                        <include name="${project.build.finalName}/**"/>
+                                        <exclude name="${project.build.finalName}/bin/*.sh"/>
+                                        <exclude name="${project.build.finalName}/bin/*.bat"/>
+                                        <exclude name="${project.build.finalName}/docker/*.sh"/>
+                                        <exclude name="${project.build.finalName}/scripts/*.sh"/>
+                                    </zipfileset>
+                                </zip>
+
+                            </target>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>checksum-distribution</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${skip.dist}</skip>
+                            <target>
+                                <checksum file="${project.build.directory}/${project.build.finalName}.tar.gz"
+                                          algorithm="SHA-256" fileext=".sha256"/>
+                                <checksum file="${project.build.directory}/${project.build.finalName}.zip"
+                                          algorithm="SHA-256" fileext=".sha256"/>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.12</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+
+</project>

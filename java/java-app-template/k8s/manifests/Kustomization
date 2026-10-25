@@ -1,0 +1,11 @@
+# NOTE: intentionally named "Kustomization" with NO extension.
+# Kustomize accepts this name, while `kubectl apply -f k8s/manifests/` ignores it
+# (it only reads .yaml/.yml/.json). Do NOT rename it to kustomization.yaml.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - configmap.yaml
+  - secret.yaml
+  - deployment.yaml
+  - service.yaml
+  

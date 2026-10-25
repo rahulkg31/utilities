@@ -1,0 +1,36 @@
+services:
+  app:
+    image: "${APP_NAME:-demo}:${APP_VERSION:-1.0.0}"
+    container_name: "${APP_NAME:-demo}"
+
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+        APP_NAME: ${APP_NAME:-demo}
+        APP_VERSION: ${APP_VERSION:-1.0.0}
+
+    ports:
+      - "${SERVER_PORT:-8080}:8080"
+
+    env_file:
+      - .env
+
+    volumes:
+      - ../conf:/app/conf
+      - ../logs:/app/logs
+      - ../db:/app/db
+      - ../data:/app/data
+
+    networks:
+      - shared-network
+
+networks:
+  shared-network:
+    # Use an existing external Docker network.
+    # This network is not automatically created by Docker Compose.
+    # Create it manually if it does not exist:
+    #   $ docker network create shared-network
+    external: true
